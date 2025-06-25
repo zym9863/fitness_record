@@ -1,0 +1,159 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送以v开头的标签时触发，例如 v1.0.0
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'  # 指定Flutter版本
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Build Windows executable
+      run: flutter build windows --release
+      
+    - name: Archive Windows build
+      run: |
+        cd build/windows/x64/runner/Release
+        tar -czf ../../../../../fitness_record-windows.tar.gz *
+        
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build
+        path: fitness_record-windows.tar.gz
+
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'  # 指定Flutter版本
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Build APK with ABI split
+      run: flutter build apk --release --split-per-abi
+      
+    - name: Upload Android artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-build
+        path: build/app/outputs/flutter-apk/*.apk
+
+  release:
+    needs: [build-windows, build-android]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')  # 只在标签推送时创建release
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download Windows artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-build
+        
+    - name: Download Android artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: android-build
+        path: apk-files
+        
+    - name: Get tag name
+      id: tag
+      run: echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.tag_name }}
+        release_name: Release ${{ steps.tag.outputs.tag_name }}
+        body: |
+          ## 🚀 发布说明
+          
+          ### 新功能
+          - 添加您的新功能描述
+          
+          ### 修复
+          - 添加您的修复说明
+          
+          ### 下载
+          - **Windows**: 下载 `fitness_record-windows.tar.gz`
+          - **Android**: 根据您的设备架构下载对应的APK文件
+            - `app-arm64-v8a-release.apk` - 适用于大多数现代Android设备
+            - `app-armeabi-v7a-release.apk` - 适用于较旧的ARM设备
+            - `app-x86_64-release.apk` - 适用于x86_64架构设备
+        draft: false
+        prerelease: false
+        
+    - name: Upload Windows Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./fitness_record-windows.tar.gz
+        asset_name: fitness_record-windows.tar.gz
+        asset_content_type: application/gzip
+        
+    - name: Upload Android APK (arm64-v8a)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./apk-files/app-arm64-v8a-release.apk
+        asset_name: fitness_record-arm64-v8a.apk
+        asset_content_type: application/vnd.android.package-archive
+        
+    - name: Upload Android APK (armeabi-v7a)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./apk-files/app-armeabi-v7a-release.apk
+        asset_name: fitness_record-armeabi-v7a.apk
+        asset_content_type: application/vnd.android.package-archive
+        
+    - name: Upload Android APK (x86_64)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./apk-files/app-x86_64-release.apk
+        asset_name: fitness_record-x86_64.apk
+        asset_content_type: application/vnd.android.package-archive
