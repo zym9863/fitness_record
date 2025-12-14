@@ -15,6 +15,7 @@ class _GoalScreenState extends State<GoalScreen> {
   final _workoutMinutesController = TextEditingController();
   final _stepsController = TextEditingController();
   final _caloriesController = TextEditingController();
+  final _waterIntakeController = TextEditingController();
   
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _GoalScreenState extends State<GoalScreen> {
       _workoutMinutesController.text = goal.dailyWorkoutMinutes.toString();
       _stepsController.text = goal.dailySteps.toString();
       _caloriesController.text = goal.dailyCalories.toString();
+      _waterIntakeController.text = goal.dailyWaterIntake.toString();
     });
   }
   
@@ -36,6 +38,7 @@ class _GoalScreenState extends State<GoalScreen> {
     _workoutMinutesController.dispose();
     _stepsController.dispose();
     _caloriesController.dispose();
+    _waterIntakeController.dispose();
     super.dispose();
   }
 
@@ -75,6 +78,13 @@ class _GoalScreenState extends State<GoalScreen> {
                 controller: _caloriesController,
                 label: '每日卡路里消耗 (千卡)',
                 icon: Icons.local_fire_department,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _waterIntakeController,
+                label: '每日饮水量 (毫升)',
+                icon: Icons.local_drink,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 30),
@@ -133,11 +143,13 @@ class _GoalScreenState extends State<GoalScreen> {
       final workoutMinutes = int.parse(_workoutMinutesController.text);
       final steps = int.parse(_stepsController.text);
       final calories = int.parse(_caloriesController.text);
+      final waterIntake = int.parse(_waterIntakeController.text);
       
       final goal = FitnessGoal(
         dailyWorkoutMinutes: workoutMinutes,
         dailySteps: steps,
         dailyCalories: calories,
+        dailyWaterIntake: waterIntake,
       );
       
       Provider.of<FitnessProvider>(context, listen: false).updateGoal(goal);
@@ -157,6 +169,7 @@ class _GoalScreenState extends State<GoalScreen> {
       _workoutMinutesController.text = defaultGoal.dailyWorkoutMinutes.toString();
       _stepsController.text = defaultGoal.dailySteps.toString();
       _caloriesController.text = defaultGoal.dailyCalories.toString();
+      _waterIntakeController.text = defaultGoal.dailyWaterIntake.toString();
     });
     
     ScaffoldMessenger.of(context).showSnackBar(

@@ -19,6 +19,7 @@ class _RecordScreenState extends State<RecordScreen> {
   final _workoutMinutesController = TextEditingController();
   final _stepsController = TextEditingController();
   final _caloriesController = TextEditingController();
+  final _waterIntakeController = TextEditingController();
   
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _RecordScreenState extends State<RecordScreen> {
         _workoutMinutesController.text = existingRecord.workoutMinutes.toString();
         _stepsController.text = existingRecord.steps.toString();
         _caloriesController.text = existingRecord.calories.toString();
+        _waterIntakeController.text = existingRecord.waterIntake.toString();
       }
     });
   }
@@ -43,6 +45,7 @@ class _RecordScreenState extends State<RecordScreen> {
     _workoutMinutesController.dispose();
     _stepsController.dispose();
     _caloriesController.dispose();
+    _waterIntakeController.dispose();
     super.dispose();
   }
 
@@ -79,6 +82,13 @@ class _RecordScreenState extends State<RecordScreen> {
                 controller: _caloriesController,
                 label: '卡路里消耗 (千卡)',
                 icon: Icons.local_fire_department,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _waterIntakeController,
+                label: '饮水量 (毫升)',
+                icon: Icons.local_drink,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 30),
@@ -128,10 +138,12 @@ class _RecordScreenState extends State<RecordScreen> {
                 _workoutMinutesController.text = existingRecord.workoutMinutes.toString();
                 _stepsController.text = existingRecord.steps.toString();
                 _caloriesController.text = existingRecord.calories.toString();
+                _waterIntakeController.text = existingRecord.waterIntake.toString();
               } else {
                 _workoutMinutesController.clear();
                 _stepsController.clear();
                 _caloriesController.clear();
+                _waterIntakeController.clear();
               }
             }
           },
@@ -188,12 +200,14 @@ class _RecordScreenState extends State<RecordScreen> {
       final workoutMinutes = int.parse(_workoutMinutesController.text);
       final steps = int.parse(_stepsController.text);
       final calories = int.parse(_caloriesController.text);
+      final waterIntake = int.parse(_waterIntakeController.text);
       
       final record = FitnessData(
         date: _selectedDate,
         workoutMinutes: workoutMinutes,
         steps: steps,
         calories: calories,
+        waterIntake: waterIntake,
       );
       
       Provider.of<FitnessProvider>(context, listen: false).addOrUpdateRecord(record);

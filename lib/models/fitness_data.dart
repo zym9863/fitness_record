@@ -3,12 +3,14 @@ class FitnessData {
   final int workoutMinutes;
   final int steps;
   final int calories;
+  final int waterIntake;
 
   FitnessData({
     required this.date,
     required this.workoutMinutes,
     required this.steps,
     required this.calories,
+    this.waterIntake = 0,
   });
 
   // 从JSON转换为对象
@@ -18,6 +20,7 @@ class FitnessData {
       workoutMinutes: json['workoutMinutes'],
       steps: json['steps'],
       calories: json['calories'],
+      waterIntake: json['waterIntake'] ?? 0,
     );
   }
 
@@ -28,6 +31,7 @@ class FitnessData {
       'workoutMinutes': workoutMinutes,
       'steps': steps,
       'calories': calories,
+      'waterIntake': waterIntake,
     };
   }
 }
@@ -36,11 +40,13 @@ class FitnessGoal {
   final int dailyWorkoutMinutes;
   final int dailySteps;
   final int dailyCalories;
+  final int dailyWaterIntake;
 
   FitnessGoal({
     required this.dailyWorkoutMinutes,
     required this.dailySteps,
     required this.dailyCalories,
+    required this.dailyWaterIntake,
   });
 
   // 从JSON转换为对象
@@ -49,6 +55,7 @@ class FitnessGoal {
       dailyWorkoutMinutes: json['dailyWorkoutMinutes'],
       dailySteps: json['dailySteps'],
       dailyCalories: json['dailyCalories'],
+      dailyWaterIntake: json['dailyWaterIntake'] ?? 2000,
     );
   }
 
@@ -58,6 +65,7 @@ class FitnessGoal {
       'dailyWorkoutMinutes': dailyWorkoutMinutes,
       'dailySteps': dailySteps,
       'dailyCalories': dailyCalories,
+      'dailyWaterIntake': dailyWaterIntake,
     };
   }
 
@@ -67,6 +75,7 @@ class FitnessGoal {
       dailyWorkoutMinutes: 30,
       dailySteps: 10000,
       dailyCalories: 300,
+      dailyWaterIntake: 2000,
     );
   }
 }

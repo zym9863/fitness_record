@@ -102,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final workoutMinutes = todayRecord?.workoutMinutes ?? 0;
     final steps = todayRecord?.steps ?? 0;
     final calories = todayRecord?.calories ?? 0;
+    final waterIntake = todayRecord?.waterIntake ?? 0;
     
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -153,6 +154,14 @@ class _HomeScreenState extends State<HomeScreen> {
               value: '$calories 千卡',
               progress: calories / goal.dailyCalories,
               color: Colors.orange,
+            ),
+            const SizedBox(height: 15),
+            _buildProgressItem(
+              icon: Icons.local_drink,
+              title: '饮水',
+              value: '$waterIntake ml',
+              progress: waterIntake / goal.dailyWaterIntake,
+              color: Colors.cyan,
             ),
           ],
         ),
